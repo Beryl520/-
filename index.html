@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重音テト - ちっちゃな私</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .player {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+        }
+        h1 {
+            color: #e84393;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        .cover {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #a29bfe, #74b9ff);
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .cover-inner {
+            width: 180px;
+            height: 180px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #a29bfe;
+        }
+        audio {
+            width: 100%;
+            margin-top: 1rem;
+            outline: none;
+        }
+        .lyrics {
+            margin-top: 1.5rem;
+            color: #636e72;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .rotate {
+            animation: rotate 10 linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="player">
+        <h1>ちっちゃな私 - 重音テト</h1>
+        <div class="cover" id="cover">
+            <div class="cover-inner">♫</div>
+        </div>
+        <audio 
+            controls 
+            autoplay
+            controlsList="nodownload noplaybackrate"
+            onplay="document.getElementById('cover').classList.add('rotate')"
+            onpause="document.getElementById('cover').classList.remove('rotate')">
+            <source src="ちっちゃな私-重音テト,マサラダ.mp3" type="audio/mp3">
+            お使いのブラウザは音声再生をサポートしていません
+        </audio>
+        <div class="lyrics">
+            <p>我用小手掌抓住的星星</p>
+            <p>我想轻轻地把它放在歌曲上</p>
+        </div>
+    </div>
+    
+    <script>
+        // 自动开始播放处理（解决Chrome自动播放策略）
+        document.addEventListener('click', function initAudio() {
+            const audio = document.querySelector('audio');
+            if (audio.paused) {
+                audio.play().catch(e => console.log("Playback failed:", e));
+            }
+            document.removeEventListener('click', initAudio);
+        });
+    </script>
+</body>
+</html>
