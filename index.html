@@ -65,7 +65,7 @@
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3 ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             font-weight: bold;
         }
@@ -135,7 +135,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
             backdrop-filter: blur(5px);
             width: 300px;
-            transition: all 0.3 ease;
+            transition: all 0.3s ease;
         }
 
         .music-info {
@@ -327,42 +327,59 @@
         const currentTimeEl = document.getElementById("currentTime");
         const durationEl = document.getElementById("duration");
         
-        // 尝试自动播放音乐
-        function tryAutoPlay() {
+        // 自动播放音乐函数
+        function autoPlayMusic() {
             backgroundMusic.volume = 0.7;
+            
+            // 尝试自动播放
             const playPromise = backgroundMusic.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(() => {
+                    // 自动播放成功
                     playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
                     updateDurationDisplay();
                 }).catch(error => {
-                    console.log("自动播放被阻止，需要用户交互:", error);
-                    // 添加用户交互后播放的提示
-                    const musicTitle = document.querySelector('.music-title');
-                    musicTitle.textContent = "点击页面播放音乐";
-                    musicTitle.style.color = "#d4818e";
-                    musicTitle.style.fontWeight = "bold";
-                    
-                    // 添加页面点击事件来启动音乐
-                    document.body.addEventListener('click', initMusic, { once: true });
+                    console.log("自动播放被阻止:", error);
+                    // 如果自动播放被阻止，显示提示并等待用户交互
+                    showPlayPrompt();
                 });
             }
         }
         
-        function initMusic() {
-            backgroundMusic.play();
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        // 显示播放提示
+        function showPlayPrompt() {
             const musicTitle = document.querySelector('.music-title');
-            musicTitle.textContent = "背景音乐播放中...";
-            musicTitle.style.color = "#68495b";
+            musicTitle.textContent = "点击任意位置播放音乐";
+            musicTitle.style.color = "#d4818e";
+            musicTitle.style.fontWeight = "bold";
+            
+            // 添加页面点击事件来启动音乐
+            document.body.addEventListener('click', initMusic, { once: true });
+        }
+        
+        // 初始化音乐播放
+        function initMusic() {
+            backgroundMusic.play()
+                .then(() => {
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    const musicTitle = document.querySelector('.music-title');
+                    musicTitle.textContent = "背景音乐播放中...";
+                    musicTitle.style.color = "#68495b";
+                    musicTitle.style.fontWeight = "normal";
+                })
+                .catch(error => {
+                    console.log("播放失败:", error);
+                });
         }
         
         // 更新总时长显示
         function updateDurationDisplay() {
-            const minutes = Math.floor(backgroundMusic.duration / 60);
-            const seconds = Math.floor(backgroundMusic.duration % 60);
-            durationEl.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            backgroundMusic.addEventListener('loadedmetadata', () => {
+                const minutes = Math.floor(backgroundMusic.duration / 60);
+                const seconds = Math.floor(backgroundMusic.duration % 60);
+                durationEl.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            });
         }
         
         // 更新进度条
@@ -401,7 +418,10 @@
         progressContainer.addEventListener('click', setProgress);
         
         // 页面加载后尝试自动播放
-        window.addEventListener('load', tryAutoPlay);
+        window.addEventListener('load', function() {
+            autoPlayMusic();
+            updateDurationDisplay();
+        });
 
         // No 按钮点击事件
         noButton.addEventListener("click", function() {
@@ -427,20 +447,22 @@
 
         // Yes 按钮点击后，进入表白成功页面
         yesButton.addEventListener("click", function() {
-            document.body.innerHTML = `
-                <div class="yes-screen">
-                    <h1 class="yes-text">能和你成为朋友真是太棒啦！(≧∇≦)ﾉ ！</h1>
-                    <img src="7.png" alt="拥抱" class="yes-image">
-                </div>
+            // 创建成功页面元素
+            const yesScreen = document.createElement('div');
+            yesScreen.className = 'yes-screen';
+            yesScreen.innerHTML = `
+                <h1 class="yes-text">能和你成为朋友真是太棒啦！(≧∇≦)ﾉ ！</h1>
+                <img src="7.png" alt="拥抱" class="yes-image">
             `;
-            document.body.style.overflow = "hidden";
             
-            // 在新的页面中保留音乐播放器
-            const musicPlayer = document.querySelector('.music-player');
-            document.body.appendChild(musicPlayer);
+            // 添加到body
+            document.body.appendChild(yesScreen);
             
-            // 在新的页面中保留音乐
-            document.body.appendChild(backgroundMusic);
+            // 隐藏原始容器
+            document.querySelector('.container').style.display = 'none';
+            
+            // 确保音乐播放器在最上层
+            document.querySelector('.music-player').style.zIndex = '1001';
         });
     </script>
 </body>
