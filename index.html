@@ -4,11 +4,201 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>可以成为我的朋友吗？</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #f1d5da;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+        }
+
+        #mainImage {
+            width: 100%;
+            max-width: 200px;
+            transition: all 0.3 ease;
+        }
+
+        h1 {
+            font-size: 5vw;
+            color: #68495b;
+            margin: 20px 0;
+        }
+
+        button {
+            font-size: 4vw;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3 ease;
+        }
+
+        #yes {
+            background-color: #d4818e;
+            color: white;
+        }
+
+        #no {
+            background-color: #6784b1;
+            color: white;
+            position: relative;
+        }
+
+        .yes-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #ffdae0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .yes-text {
+            font-size: 7vw;
+        }
+
+        .yes-image {
+            width: 50%;
+            max-width: 300px;
+        }
+
+        /* 音乐播放器样式 */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .music-control {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #d4818e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3 ease;
+        }
+
+        .music-control:hover {
+            background-color: #c06c7a;
+            transform: scale(1.1);
+        }
+
+        .music-control i {
+            font-size: 20px;
+        }
+
+        .music-title {
+            font-size: 14px;
+            color: #68495b;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 音量控制 */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            -webkit-appearance: none;
+            height: 5px;
+            border-radius: 5px;
+            background: #d4818e;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: 2px solid #d4818e;
+        }
+
+        /* 响应式设计 */
+        @media (min-width: 768px) {
+            body {
+                display: block;
+            }
+
+            .container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: auto;
+                max-width: none;
+            }
+
+            #mainImage {
+                width: 200px;
+            }
+
+            h1 {
+                font-size: 28px;
+                margin: 20px 0;
+            }
+
+            button {
+                font-size: 18px;
+            }
+
+            .yes-text {
+                font-size: 36px;
+            }
+
+            .yes-image {
+                width: 300px;
+            }
+            
+            .music-player {
+                bottom: 30px;
+                right: 30px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <img id="mainImage" src="1.png" alt="爱心">
+        <img id="mainImage" src="image/1.png" alt="爱心">
         <h1 id="question">可以成为我的朋友吗？</h1>
         <div class="buttons">
             <button id="yes">可以</button>
@@ -16,6 +206,119 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- 音乐播放器 -->
+    <div class="music-player">
+        <div class="music-title">背景音乐</div>
+        <button class="music-control" id="playPauseBtn">
+            <i class="fas fa-pause"></i>
+        </button>
+        <div class="volume-container">
+            <i class="fas fa-volume-up"></i>
+            <input type="range" min="0" max="1" step="0.1" value="0.7" class="volume-slider" id="volumeSlider">
+        </div>
+    </div>
+
+    <!-- 音频元素 -->
+    <audio id="backgroundMusic" loop>
+        <source src="8.mp3" type="audio/mpeg">
+        您的浏览器不支持音频元素。
+    </audio>
+
+    <script>
+        let yesButton = document.getElementById("yes");
+        let noButton = document.getElementById("no");
+        let questionText = document.getElementById("question");
+        let mainImage = document.getElementById("mainImage");
+        let clickCount = 0;
+
+        const noTexts = [
+            "带你一起晒太阳~",
+            "糖果分你一半呀",
+            "带你吃炸鸡汉堡ovo",
+            "让你撸撸我~",
+            "我这么可爱你也忍心拒绝吗qaq"
+        ];
+
+        // 音乐播放控制
+        const backgroundMusic = document.getElementById("backgroundMusic");
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        const volumeSlider = document.getElementById("volumeSlider");
+        
+        // 尝试自动播放音乐
+        function tryAutoPlay() {
+            backgroundMusic.volume = volumeSlider.value;
+            backgroundMusic.play()
+                .then(() => {
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                })
+                .catch(error => {
+                    console.log("自动播放被阻止，需要用户交互:", error);
+                    // 添加用户交互后播放的提示
+                    const musicTitle = document.querySelector('.music-title');
+                    musicTitle.textContent = "点击播放音乐";
+                    musicTitle.style.color = "#d4818e";
+                    musicTitle.style.fontWeight = "bold";
+                });
+        }
+        
+        // 页面加载后尝试自动播放
+        window.addEventListener('load', tryAutoPlay);
+        
+        // 播放/暂停按钮事件
+        playPauseBtn.addEventListener('click', function() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                backgroundMusic.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        });
+        
+        // 音量控制
+        volumeSlider.addEventListener('input', function() {
+            backgroundMusic.volume = volumeSlider.value;
+        });
+
+        // No 按钮点击事件
+        noButton.addEventListener("click", function() {
+            clickCount++;
+            let yesSize = 1 + (clickCount * 1.2);
+            yesButton.style.transform = `scale(${yesSize})`;
+            let noOffset = clickCount * 50;
+            noButton.style.transform = `translateX(${noOffset}px)`;
+            let moveUp = clickCount * 25;
+            mainImage.style.transform = `translateY(-${moveUp}px)`;
+            questionText.style.transform = `translateY(-${moveUp}px)`;
+
+            if (clickCount <= 5) {
+                noButton.innerText = noTexts[clickCount - 1];
+            }
+
+            if (clickCount === 1) mainImage.src = "image/2.png";
+            if (clickCount === 2) mainImage.src = "image/3.png";
+            if (clickCount === 3) mainImage.src = "image/4.png";
+            if (clickCount === 4) mainImage.src = "image/5.png";
+            if (clickCount >= 5) mainImage.src = "image/6.png";
+        });
+
+        // Yes 按钮点击后，进入表白成功页面
+        yesButton.addEventListener("click", function() {
+            document.body.innerHTML = `
+                <div class="yes-screen">
+                    <h1 class="yes-text">能和你成为朋友真是太棒啦！(≧∇≦)ﾉ ！</h1>
+                    <img src="image/7.png" alt="拥抱" class="yes-image">
+                </div>
+            `;
+            document.body.style.overflow = "hidden";
+            
+            // 在新的页面中保留音乐播放器
+            const musicPlayer = document.querySelector('.music-player');
+            document.body.appendChild(musicPlayer);
+            
+            // 在新的页面中保留音乐
+            document.body.appendChild(backgroundMusic);
+        });
+    </script>
 </body>
 </html>
